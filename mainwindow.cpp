@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "fileops.h"
+
 #include <QFile>
 #include <QMessageBox>
 
@@ -8,34 +10,14 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    QFile file(path);
-    if(!file.open(QIODevice::ReadWrite)) {
-        QMessageBox::information(0,"error",file.errorString());
-    }
-
-    QTextStream in(&file);
-
-    while(!in.atEnd()) {
-        QListWidgetItem* item = new QListWidgetItem(in.readLine(),ui->listWidget);
-        ui->listWidget->addItem(item);
-        item->setFlags(item->flags() | Qt::ItemIsEditable);
-    }
-    file.close();
+    FileOps read_file;
+    read_file.read_file(ui);
 }
 
 MainWindow::~MainWindow()
 {
-    QFile file(path);
-    if(!file.open(QIODevice::ReadWrite)) {
-        QMessageBox::information(0,"error",file.errorString());
-    }
-    file.resize(0);
-    QTextStream out(&file);
-    for(size_t i {0}; i < ui->listWidget->count(); i++) {
-        out << ui->listWidget->item(i)->text() << "\n";
-    }
-    file.close();
+    FileOps write_file;
+    write_file.write_file(ui);
     delete ui;
 }
 
